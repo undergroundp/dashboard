@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+
+<!-- FullCalendar CSS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
+
+<!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+<script src="https://apis.google.com/js/api.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+
+
+  <style>
+   :root {
+  --lavender: #CCA1C9;
+  --blush: #FFD3DD;
+  --rose: #F3A0AD;
+  --sky: #BED1E3;
+  --blue: #92A1C3;
+  --white: #fff;
+  --text-dark: #333;
+  --bg-body: #ffffff;
+}
+
+[data-theme="dark"] {
+  --lavender: #8A4C87;
+  --blush: #8E5E65;
+  --rose: #A0505E;
+  --sky: #5A6B80;
+  --blue: #4A5B7C;
+  --white: #1e1e1e;
+  --text-dark: #e0e0e0;
+  --bg-body: #121212;
+}
+
+* {
+  transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease;
+}
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: 'Nunito', sans-serif;
+      color: var(--text-dark);
+    background-color: var(--bg-body);
+  transition: background-color 0.4s, color 0.4s;
+}
+
+    body > .tabs + .tab-content {
+      margin-top: -0.5em;
+    }
+
+    .tabs {
+      display: flex;
+      padding: 0.5em;
+      gap: 0.5em;
+      margin-bottom: -0.5em;
+      position: relative;
+      z-index: 2;
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 1em;
+      text-align: center;
+      border: none;
+      border-radius: 16px 16px 0 0;
+      font-weight: 600;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+      background: var(--blush);
+      position: relative;
+      z-index: 3;
+    }
+
+    .tab-button:hover {
+      transform: translateY(-2px);
+    }
+
+    .tab-button.active {
+      background: inherit;
+      box-shadow: none;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 2em;
+      animation: fadeIn 0.4s ease-in-out;
+      min-height: 100vh;
+      margin-top: -1em;
+      position: relative;
+      z-index: 1;
+    }
+
+    .tab-content.active { display: block; }
+
+@keyframes fadeInRow {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.task-row.fade-in {
+  animation: fadeInRow 0.4s ease-out;
+}
+
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+   /* Tab content backgrounds */
+#tasks.tab-content { background-image: url('images/backie.jpg'); }
+#chores.tab-content { background: var(--blush); }
+#meal.tab-content { background: var(--rose); }#calendar.tab-content { background: var(--blue); } 
+
+/* Tab buttons stay pastel flat */
+.tab-button[onclick="showTab('tasks')"] { background: var(--lavender); }
+.tab-button[onclick="showTab('chores')"] { background: var(--blush); }
+.tab-button[onclick="showTab('meals')"] { background: var(--rose); }
+.tab-button[onclick="showTab('calendar')"] { background: var(--blue); }
+
+
+    .task-grocery-wrapper {
+      display: flex;
+      gap: 1em;
+      align-items: flex-start;
+    }
+
+.chores-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2em;
+}
+
+.chores-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1em;
+  padding-top: 1em;
+}
+
+
+
+
+    .task-list {
+      width: 100%;
+    }
+
+   .grocery-list {
+  width: 20%;
+  padding: 1em;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  font-size: 1.2em; 
+}
+
+    h3 {
+      margin-top: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1em;
+      table-layout: fixed;
+      background: var(--white);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 0.8em;
+      text-align: left;
+      word-wrap: break-word;
+    }
+
+    th {
+      background: var(--blue);
+      color: var(--white);
+      cursor: pointer;
+    }
+
+    th.sortable:hover {
+      background: var(--lavender);
+    }
+
+    td {
+      border-top: 1px solid #eee;
+    }
+
+    select {
+      width: 100%;
+      padding: 0.4em;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1em;
+      appearance: none;
+      background-color: var(--white);
+      background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+      background-repeat: no-repeat;
+      background-position-x: 95%;
+      background-position-y: center;
+    }
+
+select.priority-high {
+  background-color: var(--rose);
+  color: black;
+}
+select.priority-medium {
+  background-color: var(--lavender);
+  color: black;
+}
+select.priority-low {
+  background-color: var(--sky);
+  color: black;
+}
+
+select.cat-home { background-color: var(--blush); color: black; }
+select.cat-health { background-color: var(--lavender); color: black; }
+select.cat-documents { background-color: var(--sky); color: black; }
+select.cat-work { background-color: var(--blue); color: white; }
+select.cat-pet { background-color: var(--rose); color: black; }
+
+select.assign-lili { background-color: var(--lavender); color: black; }
+select.assign-michael { background-color: var(--sky); color: black; }
+select.assign-both { background-color: var(--blue); color: white; }
+
+
+    button {
+      padding: 0.6em 1.2em;
+      border: none;
+      background: var(--blue);
+      color: var(--white);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    button:hover {
+      background: var(--lavender);
+      transform: scale(1.05);
+    }
+
+@keyframes buttonTap {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+button:active {
+  animation: buttonTap 0.12s ease-out;
+}
+
+
+
+
+    input[type="text"] {
+      padding: 0.5em;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      width: 100%;
+      margin-top: 0.5em;
+    }
+
+.chore-button {
+  font-size: 1.4em;
+  padding: 1.2em 2em;
+  margin: 0.6em;
+  cursor: pointer;
+  background: var(--white);
+  color: var(--lavender);
+  border: 2px solid var(--lavender);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 250px;
+  text-align: center;
+}
+
+.chore-button:hover {
+  background: var(--sky);
+  color: var(--white);
+}
+
+.chore-button.done {
+  background-color: var(--lavender);
+  border-color: var(--lavender);
+  color: var(--white);
+}
+
+
+    .grocery-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5em;
+      opacity: 1;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .grocery-item.removing {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+
+.grocery-item input[type="checkbox"] {
+  width: 1.5em;
+  height: 1.5em;
+  accent-color: var(--lavender);
+  margin-right: 0.8em;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.grocery-item input[type="checkbox"]:checked {
+  transform: scale(1.3);
+}
+
+
+
+
+
+#calendar-container {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 1.5em;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.fc-toolbar-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.5em;
+  color: var(--text-dark);
+}
+
+.fc-button {
+  background-color: var(--lavender);
+  border: none;
+  border-radius: 8px;
+  font-family: 'Nunito', sans-serif;
+  padding: 0.3em 0.8em;
+  transition: background 0.3s ease;
+  color: white;
+}
+.fc-button:hover {
+  background-color: var(--blue);
+}
+
+.fc-daygrid-day-number {
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+.fc-event {
+  background-color: var(--rose);
+  border: none;
+  color: white;
+  border-radius: 6px;
+  font-size: 0.85em;
+  padding: 2px 6px;
+}
+
+.fc-day-today {
+  background: var(--sky) !important;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 2px var(--blue);
+}
+
+
+#darkModeToggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--blue);
+  color: var(--white);
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 1.4em;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: background 0.3s, transform 0.2s;
+  z-index: 10;
+}
+
+#darkModeToggle:hover {
+  background: var(--lavender);
+  transform: scale(1.1);
+}
+
+  </style>
+</head>
+<body>
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-button active" onclick="showTab('tasks')">Tasks</button>
+    <button class="tab-button" onclick="showTab('chores')">Chores</button>
+    <button class="tab-button" onclick="showTab('meal')">Meal Planner</button>
+    <button class="tab-button" onclick="showTab('calendar')">Calendar</button>
+  </div>
+
+  <!-- TASKS TAB -->
+  <div id="tasks" class="tab-content active">
+    <div class="task-grocery-wrapper">
+      <div class="task-list">
+        <button onclick="addTask()">Add Task</button>
+        <button onclick="undoDelete()">Undo Delete</button>
+        <table>
+          <thead>
+            <tr>
+              <th class="sortable" onclick="sortTasks(0)">Task</th>
+              <th class="sortable" onclick="sortTasks(1)">Priority</th>
+              <th class="sortable" onclick="sortTasks(2)">Category</th>
+              <th class="sortable" onclick="sortTasks(3)">Assigned To</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody id="task-body"></tbody>
+        </table>
+      </div>
+</div>
+</div>
+
+      
+
+<!-- CHORES TAB -->
+<div id="chores" class="tab-content">
+  <div class="chores-wrapper">
+
+    <!-- Grocery List -->
+    <div class="grocery-list">
+      <h3>Grocery List</h3>
+      <div id="grocery-items"></div>
+      <input type="text" id="grocery-input" placeholder="Add item" onkeypress="handleGroceryKey(event)" />
+      <button onclick="addGroceryItem()">Add</button>
+    </div>
+
+    <!-- Chore Buttons -->
+    <div class="chores-buttons">
+      <button class="chore-button" onclick="toggleChore(this)">Do laundry</button>
+      <button class="chore-button" onclick="toggleChore(this)">Take out trash</button>
+      <button class="chore-button" onclick="toggleChore(this)">Wash dishes</button>
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- MEAL TAB -->
+  <div id="meal" class="tab-content">
+    <button onclick="generateMealPlan()">Generate Plan</button>
+    <table>
+      <thead>
+        <tr>
+          <th>Day</th>
+          <th>Meal</th>
+          <th>Change Meal</th>
+        </tr>
+      </thead>
+      <tbody id="meal-plan-body"></tbody>
+    </table>
+  </div>
+
+  <!-- CALENDAR TAB -->
+  <div id="calendar" class="tab-content">
+<div id="calendar-events-container">
+  <button id="authorize_button" style="display: none;">Authorize</button>
+  <button id="signout_button" style="display: none;">Sign Out</button>
+  <ul id="calendar-events"></ul>
+</div>
+
+
+    <div id="fullcalendar"></div>
+  </div>
+
+  <script>
+    // --------- STATE SETUP ---------
+    const sortDirections = [true, true, 0, 0];
+    const priorityOrder = { High: 1, Medium: 2, Low: 3 };
+    const deletedTasksStack = [];
+const priorityOrders = [["High", "Medium", "Low"], ["Medium", "Low", "High"], ["Low", "High", "Medium"]];
+const categoryOrders = [["Home", "Health", "Documents", "Work", "Pet"], ["Health", "Documents", "Work", "Pet", "Home"], ["Documents", "Work", "Pet", "Home", "Health"], ["Work", "Pet", "Home", "Health", "Documents"], ["Pet", "Home", "Health", "Documents", "Work"]];
+const assignedOrders = [["Lili", "Michael", "Both"], ["Michael", "Both", "Lili"], ["Both", "Lili", "Michael"]];
+
+
+    const currentMealIndices = {};
+    const mealData = {
+      "Tuesday (Veggie)": ["Briam", "Green Beans", "Peas", "Yemista", "Potato leek soup", "Curry carrot soup", "Tomato soup", "French Onion Soup"],
+      "Wednesday (Fish and Chicken)": ["Chicken Pot Pie", "Salmon", "Baked Anchovies", "Chicken & Greens", "Chicken Nuggets"],
+      "Thursday (Meat and Starch)": ["Lemon Pork with Mashed Potatoes", "Shepherd's Pie", "Burgers", "Hot Dog", "Soutzoukakia", "Spaghetti and Meatballs", "Burritos", "Burgers with Potatoes", "Saucy Sausage Eggs", "Meat Stew", "Youvarlakia", "Bao Buns"],
+      "Friday (Lentils and Beans)": ["Lentils", "Chickpeas", "Beans"],
+      "Saturday (Pasta and Pizza)": ["Marinara Spaghetti", "Pastitsio", "Broccoli Pasta", "Prosciutto and Mozarella Pesto", "Spinach and Ricotta Shells", "Lasagna Bolognese", "Canelloni", "Mac & Cheese", "Turkish Pasta", "Asian Noodles", "Pizza", "Orzo"],
+      "Sunday (Bowls)": ["Leftovers", "Greens & Grains Bowl", "Rice Bowl"],
+      "Monday (Simple)": ["Sandwich", "Fish sticks", "Girl Dinner", "Leftovers", "Rice Bowl"]
+    };
+
+    // --------- TAB NAVIGATION ---------
+    function showTab(id) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelector(`.tab-button[onclick="showTab('${id}')"]`).classList.add('active');
+
+// Force re-render when calendar tab is shown
+
+  if (id === 'calendar' && window.myDashboardCalendar) {
+    window.myDashboardCalendar.render();
+  }
+}
+
+
+    // --------- TASK FUNCTIONS ---------
+   function addTask() {
+  const row = document.createElement('tr');
+row.classList.add('task-row', 'fade-in');
+  row.innerHTML = `
+    <td contenteditable="true">New Task</td>
+    <td>
+      <select>
+        <option>High</option>
+        <option>Medium</option>
+        <option>Low</option>
+      </select>
+    </td>
+    <td>
+      <select>
+        <option>Home</option>
+        <option>Health</option>
+        <option>Documents</option>
+        <option>Work</option>
+        <option>Pet</option>
+      </select>
+    </td>
+    <td>
+      <select>
+        <option>Lili</option>
+        <option>Michael</option>
+        <option>Both</option>
+      </select>
+    </td>
+    <td><button onclick="deleteTask(this)">🗑️</button></td>
+  `;
+
+  // Save task text input on edit
+  const editableCell = row.querySelector('td[contenteditable]');
+editableCell.addEventListener('input', saveTasksToStorage);
+editableCell.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    editableCell.blur();  // Exit editing
+  }
+});
+
+  // Attach onchange listeners + styling to dropdowns
+  const selects = row.querySelectorAll('select');
+
+  const styleAndSave = (select, classPrefix) => {
+    const update = () => {
+      select.className = `${classPrefix}-${select.value.toLowerCase()}`;
+      saveTasksToStorage();
+    };
+    update(); // Initial styling
+    select.addEventListener('change', update);
+  };
+
+  styleAndSave(selects[0], 'priority');
+  styleAndSave(selects[1], 'cat');
+  styleAndSave(selects[2], 'assign');
+
+  document.getElementById('task-body').appendChild(row);
+
+editableCell.focus();
+
+// Select the "New Task" text
+const range = document.createRange();
+range.selectNodeContents(editableCell);
+const sel = window.getSelection();
+sel.removeAllRanges();
+sel.addRange(range);
+
+// 🧼 Remove fade-in class after animation ends
+row.addEventListener('animationend', () => {
+  row.classList.remove('fade-in');
+});
+
+  saveTasksToStorage();
+applySelectStyles();
+}
+
+
+function deleteTask(btn) {
+  const row = btn.closest('tr');
+  const task = {
+    text: row.cells[0].innerText.trim(),
+    priority: row.cells[1].querySelector('select').value,
+    category: row.cells[2].querySelector('select').value,
+    assignedTo: row.cells[3].querySelector('select').value
+  };
+  if (deletedTasksStack.length >= 5) deletedTasksStack.shift();
+  deletedTasksStack.push(task);
+  row.remove();
+  saveTasksToStorage();
+}
+
+
+   function undoDelete() {
+  const task = deletedTasksStack.pop();
+  if (!task) return;
+
+const row = document.createElement('tr');
+row.classList.add('task-row', 'fade-in');
+  row.innerHTML = `
+    <td contenteditable="true">${task.text}</td>
+    <td>
+      <select>
+        <option>High</option>
+        <option>Medium</option>
+        <option>Low</option>
+      </select>
+    </td>
+    <td>
+      <select>
+        <option>Home</option>
+        <option>Health</option>
+        <option>Documents</option>
+        <option>Work</option>
+        <option>Pet</option>
+      </select>
+    </td>
+    <td>
+      <select>
+        <option>Lili</option>
+        <option>Michael</option>
+        <option>Both</option>
+      </select>
+    </td>
+    <td><button onclick="deleteTask(this)">🗑️</button></td>
+  `;
+
+  // Set dropdown values explicitly
+  const selects = row.querySelectorAll('select');
+  selects[0].value = task.priority;
+  selects[1].value = task.category;
+  selects[2].value = task.assignedTo;
+
+  // Apply styling and save listeners
+  const styleAndSave = (select, classPrefix) => {
+    const update = () => {
+      select.className = `${classPrefix}-${select.value.toLowerCase()}`;
+      saveTasksToStorage();
+    };
+    update();
+    select.addEventListener('change', update);
+  };
+
+  styleAndSave(selects[0], 'priority');
+  styleAndSave(selects[1], 'cat');
+  styleAndSave(selects[2], 'assign');
+
+const editableCell = row.querySelector('td[contenteditable]');
+editableCell.addEventListener('input', saveTasksToStorage);
+editableCell.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    editableCell.blur();
+  }
+});
+
+
+  document.getElementById('task-body').appendChild(row);
+
+// 🧼 Remove fade-in class after animation ends
+clonedRow.addEventListener('animationend', () => {
+  clonedRow.classList.remove('fade-in');
+});
+
+  saveTasksToStorage();
+}
+
+
+
+
+  function sortTasks(colIndex) {
+  const tbody = document.getElementById('task-body');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  let order;
+
+  if (colIndex === 1) {  // Priority
+    order = priorityOrders[sortDirections[1] % priorityOrders.length];
+    rows.sort((a, b) => order.indexOf(a.cells[1].querySelector('select').value) - order.indexOf(b.cells[1].querySelector('select').value));
+    sortDirections[1]++;
+  } else if (colIndex === 2) {  // Category
+    order = categoryOrders[sortDirections[2] % categoryOrders.length];
+    rows.sort((a, b) => order.indexOf(a.cells[2].querySelector('select').value) - order.indexOf(b.cells[2].querySelector('select').value));
+    sortDirections[2]++;
+  } else if (colIndex === 3) {  // Assigned To
+    order = assignedOrders[sortDirections[3] % assignedOrders.length];
+    rows.sort((a, b) => order.indexOf(a.cells[3].querySelector('select').value) - order.indexOf(b.cells[3].querySelector('select').value));
+    sortDirections[3]++;
+  } else {  // Task Name
+    const asc = sortDirections[0];
+    rows.sort((a, b) => asc ? a.cells[0].innerText.localeCompare(b.cells[0].innerText) : b.cells[0].innerText.localeCompare(a.cells[0].innerText));
+    sortDirections[0] = !asc;
+  }
+
+  tbody.innerHTML = '';
+  rows.forEach(row => tbody.appendChild(row));
+}
+
+
+    function saveTasksToStorage() {
+      const rows = document.querySelectorAll('#task-body tr');
+      const tasks = Array.from(rows).map(row => {
+        return {
+          text: row.cells[0].innerText.trim(),
+          priority: row.cells[1].querySelector('select').value,
+          category: row.cells[2].querySelector('select').value,
+          assignedTo: row.cells[3].querySelector('select').value
+        };
+      });
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    function loadTasksFromStorage() {
+      const saved = localStorage.getItem('tasks');
+      if (!saved) return;
+      const tasks = JSON.parse(saved);
+      const tbody = document.getElementById('task-body');
+      tbody.innerHTML = '';
+      tasks.forEach(task => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td contenteditable="true">${task.text}</td>
+          <td><select><option>High</option><option>Medium</option><option>Low</option></select></td>
+          <td><select><option>Home</option><option>Health</option><option>Documents</option><option>Work</option><option>Pet</option></select></td>
+          <td><select><option>Lili</option><option>Michael</option><option>Both</option></select></td>
+          <td><button onclick="deleteTask(this)">🗑️</button></td>`;
+        const editableCell = row.querySelector('td[contenteditable]');
+editableCell.addEventListener('input', saveTasksToStorage);
+editableCell.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    editableCell.blur();
+  }
+});
+
+        row.querySelectorAll('select')[0].value = task.priority;
+        row.querySelectorAll('select')[1].value = task.category;
+        row.querySelectorAll('select')[2].value = task.assignedTo;
+        tbody.appendChild(row);
+      });
+      applySelectStyles();
+    }
+
+    // --------- SELECT STYLE UTILS ---------
+    function applySelectStyles() {
+      document.querySelectorAll('#task-body tr').forEach(row => {
+        const selects = row.querySelectorAll('select');
+        if (selects.length === 3) {
+          const [priority, category, assigned] = selects;
+          priority.className = `priority-${priority.value.toLowerCase()}`;
+          category.className = `cat-${category.value.toLowerCase()}`;
+          assigned.className = `assign-${assigned.value.toLowerCase()}`;
+
+          priority.onchange = () => priority.className = `priority-${priority.value.toLowerCase()}`;
+          category.onchange = () => category.className = `cat-${category.value.toLowerCase()}`;
+          assigned.onchange = () => assigned.className = `assign-${assigned.value.toLowerCase()}`;
+        }
+      });
+    }
+
+    // --------- GROCERY FUNCTIONS ---------
+    function addGroceryItem() {
+      const input = document.getElementById('grocery-input');
+      const value = input.value.trim();
+      if (!value) return;
+
+      const div = document.createElement('div');
+      div.className = 'grocery-item';
+      div.innerHTML = `<input type="checkbox"> <label>${value}</label>`;
+
+      div.querySelector('input').addEventListener('change', () => {
+        div.classList.add('removing');
+        setTimeout(() => {
+          div.remove();
+          saveGroceriesToStorage();
+        }, 300);
+      });
+
+      document.getElementById('grocery-items').appendChild(div);
+      input.value = '';
+      saveGroceriesToStorage();
+    }
+
+    function handleGroceryKey(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addGroceryItem();
+      }
+    }
+
+    function saveGroceriesToStorage() {
+      const items = Array.from(document.querySelectorAll('#grocery-items label')).map(label => label.innerText.trim());
+      localStorage.setItem('groceryItems', JSON.stringify(items));
+    }
+
+    function loadGroceriesFromStorage() {
+      const saved = localStorage.getItem('groceryItems');
+      if (!saved) return;
+      const items = JSON.parse(saved);
+      items.forEach(value => {
+        const div = document.createElement('div');
+        div.className = 'grocery-item';
+        div.innerHTML = `<input type="checkbox"> <label>${value}</label>`;
+        div.querySelector('input').addEventListener('change', () => {
+          div.classList.add('removing');
+          setTimeout(() => {
+            div.remove();
+            saveGroceriesToStorage();
+          }, 300);
+        });
+        document.getElementById('grocery-items').appendChild(div);
+      });
+    }
+
+    // --------- CHORE FUNCTIONS ---------
+    function toggleChore(btn) {
+      btn.classList.toggle('done');
+      saveChoresToStorage();
+    }
+
+    function saveChoresToStorage() {
+      const doneChores = Array.from(document.querySelectorAll('.chore-button.done')).map(btn => btn.innerText.trim());
+      localStorage.setItem('doneChores', JSON.stringify(doneChores));
+    }
+
+    function loadChoresFromStorage() {
+      const saved = localStorage.getItem('doneChores');
+      if (!saved) return;
+      const doneChores = JSON.parse(saved);
+      document.querySelectorAll('.chore-button').forEach(btn => {
+        if (doneChores.includes(btn.innerText.trim())) {
+          btn.classList.add('done');
+        }
+      });
+    }
+
+    // --------- MEAL PLAN FUNCTIONS ---------
+    function generateMealPlan() {
+      const tbody = document.getElementById('meal-plan-body');
+      tbody.innerHTML = '';
+      for (const [day, meals] of Object.entries(mealData)) {
+        let index = (currentMealIndices[day] + 1) % meals.length;
+        currentMealIndices[day] = index;
+        const meal = meals[index];
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${day}</td><td>${meal}</td><td><button onclick="changeMeal(this, '${day}')">Change Meal</button></td>`;
+        tbody.appendChild(row);
+      }
+      saveMealProgressToStorage();
+    }
+
+    function changeMeal(btn, day) {
+      const cell = btn.parentElement.previousElementSibling;
+      const meals = mealData[day];
+      let index = (currentMealIndices[day] + 1) % meals.length;
+      currentMealIndices[day] = index;
+      cell.innerText = meals[index];
+      saveMealProgressToStorage();
+    }
+
+    function saveMealProgressToStorage() {
+      localStorage.setItem('mealProgressIndices', JSON.stringify(currentMealIndices));
+    }
+
+    function loadMealProgressFromStorage() {
+      const saved = localStorage.getItem('mealProgressIndices');
+      if (!saved) return;
+      const savedIndices = JSON.parse(saved);
+      Object.keys(savedIndices).forEach(day => currentMealIndices[day] = savedIndices[day]);
+      const tbody = document.getElementById('meal-plan-body');
+      tbody.innerHTML = '';
+      for (const [day, meals] of Object.entries(mealData)) {
+        const index = currentMealIndices[day] || 0;
+        const meal = meals[index];
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${day}</td><td>${meal}</td><td><button onclick="changeMeal(this, '${day}')">Change Meal</button></td>`;
+        tbody.appendChild(row);
+      }
+    }
+
+    // --------- INITIAL LOAD ---------
+window.addEventListener('DOMContentLoaded', () => {
+  loadTasksFromStorage();
+  loadGroceriesFromStorage();
+  loadChoresFromStorage();
+  loadMealProgressFromStorage();
+
+  // === FULLCALENDAR INIT ===
+  const calendarEl = document.getElementById('fullcalendar');
+  if (calendarEl) {
+    window.myDashboardCalendar = new FullCalendar.Calendar(calendarEl, {
+  initialView: 'dayGridMonth',
+firstDay: 1,
+  height: 'auto',
+  headerToolbar: {
+  start: 'prev,next today',
+  center: 'title',
+  end: 'dayGridMonth,timeGridWeek,timeGridDay'  // ← view toggles
+},
+  events: [ ]
+});
+window.myDashboardCalendar.render();
+
+  }
+
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  document.getElementById('darkModeToggle').innerText = savedTheme === 'dark' ? '🌙' : '☀️';
+});
+
+
+function toggleDarkMode() {
+  const root = document.documentElement;
+  const currentTheme = root.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+  document.getElementById('darkModeToggle').innerText = newTheme === 'dark' ? '🌙' : '☀️';
+}
+
+
+
+
+
+  </script>
+
+<button id="darkModeToggle" onclick="toggleDarkMode()">🌙</button>
+
+
+
+<script>
+  const CLIENT_ID = '60730614984-kk3u711uphe6s7b9qk7snck1ndhev8o5.apps.googleusercontent.com';
+  const API_KEY = 'AIzaSyCpuMO7OHJm3LhpjpfjlnyWSEBjafxJ4Dw';
+  const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
+  const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
+
+ let tokenClient;
+  let gapiInited = false;
+  let gisInited = false;
+
+  document.getElementById('authorize_button').onclick = handleAuthClick;
+  document.getElementById('signout_button').onclick = handleSignoutClick;
+
+  function gapiLoaded() {
+    gapi.load('client', initializeGapiClient);
+  }
+
+  async function initializeGapiClient() {
+    await gapi.client.init({
+      apiKey: API_KEY,
+      discoveryDocs: [DISCOVERY_DOC],
+    });
+    gapiInited = true;
+    maybeEnableButtons();
+  }
+
+  function gisLoaded() {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: SCOPES,
+      callback: '', // Defined later
+    });
+    gisInited = true;
+    maybeEnableButtons();
+  }
+
+  function maybeEnableButtons() {
+    if (gapiInited && gisInited) {
+      document.getElementById('authorize_button').style.display = 'inline-block';
+    }
+  }
+
+  function handleAuthClick() {
+    tokenClient.callback = async (resp) => {
+      if (resp.error) throw resp;
+      document.getElementById('signout_button').style.display = 'inline-block';
+      document.getElementById('authorize_button').style.display = 'none';
+      await listUpcomingEvents();
+    };
+
+    tokenClient.requestAccessToken({ prompt: 'consent' });
+  }
+
+  function handleSignoutClick() {
+    google.accounts.oauth2.revoke(tokenClient.access_token, () => {
+      document.getElementById('signout_button').style.display = 'none';
+      document.getElementById('authorize_button').style.display = 'inline-block';
+      document.getElementById('calendar-events').innerHTML = '';
+    });
+  }
+
+  async function listUpcomingEvents() {
+  gapi.client.calendar.events.list({
+    calendarId: 'primary',
+    timeMin: (new Date()).toISOString(),
+    showDeleted: false,
+    singleEvents: true,
+    maxResults: 50,
+    orderBy: 'startTime'
+  }).then(function(response) {
+    const events = response.result.items.map(event => {
+      return {
+        title: event.summary,
+        start: event.start.dateTime || event.start.date,
+        end: event.end?.dateTime || event.end?.date,
+      };
+    });
+
+    if (window.myDashboardCalendar) {
+      window.myDashboardCalendar.removeAllEvents(); // clear old
+      window.myDashboardCalendar.addEventSource(events); // add new
+    }
+  });
+}
+</script>
+
+
+<!-- Load API and GIS -->
+<script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+<script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+
+</body>
+</html>
