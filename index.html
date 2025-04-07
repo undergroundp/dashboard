@@ -577,7 +577,7 @@ editableCell.addEventListener('keydown', e => {
   const styleAndSave = (select, classPrefix) => {
     const update = () => {
       select.className = `${classPrefix}-${select.value.toLowerCase()}`;
-      saveTasksToStorage();
+      saveTasksToGoogleSheet();
     };
     update(); // Initial styling
     select.addEventListener('change', update);
@@ -603,7 +603,7 @@ row.addEventListener('animationend', () => {
   row.classList.remove('fade-in');
 });
 
-  saveTasksToStorage();
+  saveTasksToGoogleSheet();
 applySelectStyles();
 }
 
@@ -619,7 +619,7 @@ function deleteTask(btn) {
   if (deletedTasksStack.length >= 5) deletedTasksStack.shift();
   deletedTasksStack.push(task);
   row.remove();
-  saveTasksToStorage();
+  saveTasksToGoogleSheet();
 }
 
 
@@ -667,7 +667,7 @@ row.classList.add('task-row', 'fade-in');
   const styleAndSave = (select, classPrefix) => {
     const update = () => {
       select.className = `${classPrefix}-${select.value.toLowerCase()}`;
-      saveTasksToStorage();
+      saveTasksToGoogleSheet();
     };
     update();
     select.addEventListener('change', update);
@@ -694,7 +694,7 @@ clonedRow.addEventListener('animationend', () => {
   clonedRow.classList.remove('fade-in');
 });
 
-  saveTasksToStorage();
+  saveTasksToGoogleSheet();
 }
 
 
@@ -728,18 +728,27 @@ clonedRow.addEventListener('animationend', () => {
 }
 
 
-    function saveTasksToStorage() {
-      const rows = document.querySelectorAll('#task-body tr');
-      const tasks = Array.from(rows).map(row => {
-        return {
-          text: row.cells[0].innerText.trim(),
-          priority: row.cells[1].querySelector('select').value,
-          category: row.cells[2].querySelector('select').value,
-          assignedTo: row.cells[3].querySelector('select').value
-        };
-      });
-      localStorage.setItem('tasks', JSON.stringify(tasks));
-    }
+   async function saveTasksToGoogleSheet() {
+  const rows = document.querySelectorAll('#task-body tr');
+  const tasks = Array.from(rows).map(row => ({
+    Task: row.cells[0].innerText.trim(),
+    Priority: row.cells[1].querySelector('select').value,
+    Category: row.cells[2].querySelector('select').value,
+    AssignedTo: row.cells[3].querySelector('select').value
+  }));
+
+  try {
+    await fetch('https://script.google.com/macros/s/AKfycbykK3QZ8vXRgZrkKWTr6tEd82FQoHQikEFciSAVY8xXZCwZc412Qg1zaKypIT5i-PAQ/exec', {
+      method: 'POST',
+      body: JSON.stringify(tasks),
+      headers: { 'Content-Type': 'application/json' }
+    });
+    console.log('✅ Tasks saved to Google Sheet');
+  } catch (err) {
+    console.error('❌ Error saving tasks:', err);
+  }
+}
+
 
 async function loadTasksFromStorage() {
   try {
