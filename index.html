@@ -1045,8 +1045,8 @@ function toggleDarkMode() {
 }
 
 
-  window.onload = () => {
-  if (gapiInited && gisInited) {
+window.onload = () => {
+  if (gapiInited && gisInited && tokenClient) {
     tokenClient.callback = async (resp) => {
       if (resp.error) {
         console.log("Silent token request failed, showing button.");
@@ -1058,9 +1058,11 @@ function toggleDarkMode() {
       await listUpcomingEvents();
     };
 
-
+    // Attempt silent auth — only works if already authorized
+    tokenClient.requestAccessToken({ prompt: '' });
   }
 };
+
 
 </script>
 
