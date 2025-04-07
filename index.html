@@ -563,7 +563,7 @@ row.classList.add('task-row', 'fade-in');
 
   // Save task text input on edit
   const editableCell = row.querySelector('td[contenteditable]');
-editableCell.addEventListener('input', saveTasksToStorage);
+editableCell.addEventListener('input', saveTasksToGoogleSheet);
 editableCell.addEventListener('keydown', e => {
   if (e.key === 'Enter') {
     e.preventDefault();
@@ -678,7 +678,7 @@ row.classList.add('task-row', 'fade-in');
   styleAndSave(selects[2], 'assign');
 
 const editableCell = row.querySelector('td[contenteditable]');
-editableCell.addEventListener('input', saveTasksToStorage);
+editableCell.addEventListener('input', saveTasksToGoogleSheet);
 editableCell.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     e.preventDefault();
