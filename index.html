@@ -964,7 +964,7 @@ function toggleDarkMode() {
 
  async function listUpcomingEvents() {
   try {
-    const response = await fetch('http://localhost:3000/events');
+    const response = await fetch('https://calendar-backend-jnq8.onrender.com/events');
     const events = await response.json();
 
     if (window.myDashboardCalendar) {
