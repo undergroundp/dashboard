@@ -960,25 +960,29 @@ function toggleDarkMode() {
 
 
 <script>
+  async function listUpcomingEvents() {
+    try {
+      const response = await fetch('https://calendar-backend-jnq8.onrender.com/events');
+      const rawEvents = await response.json();
 
+      const events = rawEvents.map(event => ({
+        title: event.summary || 'No title',
+        start: event.start?.dateTime || event.start?.date,
+        end: event.end?.dateTime || event.end?.date
+      }));
 
- async function listUpcomingEvents() {
-  try {
-    const response = await fetch('https://calendar-backend-jnq8.onrender.com/events');
-    const events = await response.json();
+      console.log('🎉 EVENTS RECEIVED:', events);
 
-    if (window.myDashboardCalendar) {
-      window.myDashboardCalendar.removeAllEvents();
-      window.myDashboardCalendar.addEventSource(events);
+      if (window.myDashboardCalendar) {
+        window.myDashboardCalendar.removeAllEvents();
+        window.myDashboardCalendar.addEventSource(events);
+      }
+    } catch (err) {
+      console.error('❌ Failed to load events from backend:', err);
     }
-  } catch (err) {
-    console.error('❌ Failed to load events from backend:', err);
   }
-}
-
-
-
 </script>
+
 
 
 
