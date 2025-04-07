@@ -1049,19 +1049,22 @@ window.onload = () => {
   if (gapiInited && gisInited && tokenClient) {
     tokenClient.callback = async (resp) => {
       if (resp.error) {
-        console.log("Silent token request failed, showing button.");
+        console.warn("Silent token request failed, showing authorize button.");
         document.getElementById('authorize_button').style.display = 'inline-block';
         return;
       }
-      document.getElementById('signout_button').style.display = 'inline-block';
+
+      // Success — user was already logged in
       document.getElementById('authorize_button').style.display = 'none';
+      document.getElementById('signout_button').style.display = 'inline-block';
       await listUpcomingEvents();
     };
 
-    // Attempt silent auth — only works if already authorized
-    tokenClient.requestAccessToken({ prompt: '' });
+    // Attempt silent sign-in (won’t prompt)
+    tokenClient.requestAccessToken({ prompt: 'none' });
   }
 };
+
 
 
 </script>
