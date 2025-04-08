@@ -15,6 +15,32 @@
 <script src="https://apis.google.com/js/api.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 
+  <!-- Firebase App (the core Firebase SDK) -->
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js"></script>
+
+<!-- Firebase Realtime Database -->
+<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js"></script>
+
+<script>
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyA_DCdUq9Nyi_n1dNHRanobGReveOqdS0g",
+    authDomain: "dashboard-sync-901fd.firebaseapp.com",
+    databaseURL: "https://dashboard-sync-901fd-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "dashboard-sync-901fd",
+    storageBucket: "dashboard-sync-901fd.appspot.com",
+    messagingSenderId: "901043569116",
+    appId: "1:901043569116:web:522c157f002d4bfc794f19"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+
+  // Make Realtime Database available globally
+  window.db = firebase.database();
+</script>
+
+
 
   <style>
    :root {
@@ -492,23 +518,7 @@ button:active {
     <div id="fullcalendar"></div>
   </div>
 
-  <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyA_DCdUq9Nyi_n1dNHRanobGReveOqdS0g",
-    authDomain: "dashboard-sync-901fd.firebaseapp.com",
-    databaseURL: "https://dashboard-sync-901fd-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "dashboard-sync-901fd",
-    storageBucket: "dashboard-sync-901fd.firebasestorage.app",
-    messagingSenderId: "901043569116",
-    appId: "1:901043569116:web:522c157f002d4bfc794f19"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
+ <script>
     
     // --------- STATE SETUP ---------
     const sortDirections = [true, true, 0, 0];
