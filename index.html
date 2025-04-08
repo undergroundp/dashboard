@@ -939,6 +939,8 @@ function generateMealPlan() {
   const tbody = document.getElementById('meal-plan-body');
   tbody.innerHTML = '';
   for (const [day, meals] of Object.entries(mealData)) {
+    if (!meals || meals.length === 0) continue; // 🛡️ skip if no meals defined
+
     let index = ((currentMealIndices[day] ?? -1) + 1) % meals.length;
     currentMealIndices[day] = index;
     const meal = meals[index];
@@ -950,14 +952,18 @@ function generateMealPlan() {
 }
 
 
-    function changeMeal(btn, day) {
-      const cell = btn.parentElement.previousElementSibling;
-      const meals = mealData[day];
-let index = ((currentMealIndices[day] ?? -1) + 1) % meals.length;
-      currentMealIndices[day] = index;
-      cell.innerText = meals[index];
-      saveMealProgressToFirebase();
-    }
+
+function changeMeal(btn, day) {
+  const cell = btn.parentElement.previousElementSibling;
+  const meals = mealData[day];
+  if (!meals || meals.length === 0) return;
+
+  let index = ((currentMealIndices[day] ?? -1) + 1) % meals.length;
+  currentMealIndices[day] = index;
+  cell.innerText = meals[index];
+  saveMealProgressToFirebase();
+}
+
 
 function saveMealProgressToFirebase() {
   window.db.ref('meals').set(currentMealIndices)
