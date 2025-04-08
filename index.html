@@ -177,12 +177,16 @@
 }
 
 .chores-buttons {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 1em;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6em; /* This reduces the space between buttons */
+  align-items: stretch;
+  justify-items: stretch;
   padding-top: 1em;
+  width: 100%;
+  max-width: 1000px;
 }
+
 
 
 
