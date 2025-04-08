@@ -215,27 +215,16 @@
       margin-top: 0;
     }
     
-:root {
-  --frost-opacity: 0.75; /* Try 0.75 or even 0.9 */
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1em;
-  table-layout: fixed;
-  background: linear-gradient(
-    135deg,
-    rgba(243, 160, 173, var(--frost-opacity)),
-    rgba(190, 209, 227, var(--frost-opacity))
-  );
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1em;
+      table-layout: fixed;
+      background: var(--white);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
 
 
     th, td {
