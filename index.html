@@ -754,7 +754,7 @@ clonedRow.addEventListener('animationend', () => {
 }
 
 
-async function saveTasksToFirebase() {
+function saveTasksToFirebase() {
   const rows = document.querySelectorAll('#task-body tr');
   const tasks = Array.from(rows).map(row => ({
     Task: row.cells[0].innerText.trim(),
@@ -763,61 +763,57 @@ async function saveTasksToFirebase() {
     AssignedTo: row.cells[3].querySelector('select').value
   }));
 
-  try {
-    await set(ref(db, 'tasks'), tasks);
-    console.log('✅ Tasks saved to Firebase');
-  } catch (err) {
-    console.error('❌ Error saving tasks to Firebase:', err);
-  }
+  window.db.ref('tasks').set(tasks)
+    .then(() => console.log('✅ Tasks saved to Firebase'))
+    .catch(err => console.error('❌ Error saving tasks to Firebase:', err));
 }
 
 
 
-async function loadTasksFromFirebase() {
-  try {
-    const snapshot = await get(ref(db, 'tasks'));
-    if (!snapshot.exists()) {
-      console.log("No tasks found in Firebase");
-      return;
-    }
 
-    const tasks = snapshot.val();
-    const tbody = document.getElementById('task-body');
-    tbody.innerHTML = '';
+function loadTasksFromFirebase() {
+  window.db.ref('tasks').once('value')
+    .then(snapshot => {
+      const tasks = snapshot.val();
+      if (!tasks) return;
 
-    tasks.forEach(task => {
-      const row = document.createElement('tr');
-      row.innerHTML = `<td contenteditable="true">${task.Task}</td>
-        <td><select><option>High</option><option>Medium</option><option>Low</option></select></td>
-        <td><select><option>Home</option><option>Health</option><option>Documents</option><option>Work</option><option>Pet</option></select></td>
-        <td><select><option>Lili</option><option>Michael</option><option>Both</option></select></td>
-        <td><button onclick="deleteTask(this)">🗑️</button></td>`;
+      const tbody = document.getElementById('task-body');
+      tbody.innerHTML = '';
 
-      const selects = row.querySelectorAll('select');
-      selects[0].value = task.Priority || 'Medium';
-      selects[1].value = task.Category || 'Home';
-      selects[2].value = task.AssignedTo || 'Both';
+      tasks.forEach(task => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td contenteditable="true">${task.Task}</td>
+          <td><select><option>High</option><option>Medium</option><option>Low</option></select></td>
+          <td><select><option>Home</option><option>Health</option><option>Documents</option><option>Work</option><option>Pet</option></select></td>
+          <td><select><option>Lili</option><option>Michael</option><option>Both</option></select></td>
+          <td><button onclick="deleteTask(this)">🗑️</button></td>`;
 
-      const editableCell = row.querySelector('td[contenteditable]');
-      editableCell.addEventListener('input', saveTasksToFirebase);
-      editableCell.addEventListener('keydown', e => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          editableCell.blur();
-        }
+        const selects = row.querySelectorAll('select');
+        selects[0].value = task.Priority || 'Medium';
+        selects[1].value = task.Category || 'Home';
+        selects[2].value = task.AssignedTo || 'Both';
+
+        const editableCell = row.querySelector('td[contenteditable]');
+        editableCell.addEventListener('input', saveTasksToFirebase);
+        editableCell.addEventListener('keydown', e => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            editableCell.blur();
+          }
+        });
+
+        row.querySelectorAll('select').forEach(select => {
+          select.addEventListener('change', saveTasksToFirebase);
+        });
+
+        tbody.appendChild(row);
       });
 
-      row.querySelectorAll('select').forEach(select => {
-        select.addEventListener('change', saveTasksToFirebase);
-      });
-
-      tbody.appendChild(row);
+      applySelectStyles();
+    })
+    .catch(err => {
+      console.error('❌ Failed to load tasks from Firebase:', err);
     });
-
-    applySelectStyles();
-  } catch (err) {
-    console.error('❌ Failed to load tasks from Firebase:', err);
-  }
 }
 
 
