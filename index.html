@@ -15,6 +15,23 @@
 <script src="https://apis.google.com/js/api.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA_DCdUq9Nyi_n1dNHRanobGReveOqdS0g",
+    authDomain: "dashboard-sync-901fd.firebaseapp.com",
+    databaseURL: "https://dashboard-sync-901fd-default-rtdb.firebaseio.com",
+    projectId: "dashboard-sync-901fd",
+    storageBucket: "dashboard-sync-901fd.firebasestorage.app",
+    messagingSenderId: "901043569116",
+    appId: "1:901043569116:web:522c157f002d4bfc794f19"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  window.db = getDatabase(app);
+</script>
 
 
   <style>
@@ -563,7 +580,7 @@ row.classList.add('task-row', 'fade-in');
 
   // Save task text input on edit
   const editableCell = row.querySelector('td[contenteditable]');
-editableCell.addEventListener('input', saveTasksToGoogleSheet);
+editableCell.addEventListener('input', saveTasksToFirebase);
 editableCell.addEventListener('keydown', e => {
   if (e.key === 'Enter') {
     e.preventDefault();
@@ -577,7 +594,7 @@ editableCell.addEventListener('keydown', e => {
   const styleAndSave = (select, classPrefix) => {
     const update = () => {
       select.className = `${classPrefix}-${select.value.toLowerCase()}`;
-      saveTasksToGoogleSheet();
+      saveTasksToFirebase();
     };
     update(); // Initial styling
     select.addEventListener('change', update);
@@ -603,7 +620,7 @@ row.addEventListener('animationend', () => {
   row.classList.remove('fade-in');
 });
 
-  saveTasksToGoogleSheet();
+  saveTasksToFirebase();
 applySelectStyles();
 }
 
@@ -619,7 +636,7 @@ function deleteTask(btn) {
   if (deletedTasksStack.length >= 5) deletedTasksStack.shift();
   deletedTasksStack.push(task);
   row.remove();
-  saveTasksToGoogleSheet();
+ saveTasksToFirebase();
 }
 
 
@@ -667,7 +684,7 @@ row.classList.add('task-row', 'fade-in');
   const styleAndSave = (select, classPrefix) => {
     const update = () => {
       select.className = `${classPrefix}-${select.value.toLowerCase()}`;
-      saveTasksToGoogleSheet();
+     saveTasksToFirebase();
     };
     update();
     select.addEventListener('change', update);
@@ -678,7 +695,7 @@ row.classList.add('task-row', 'fade-in');
   styleAndSave(selects[2], 'assign');
 
 const editableCell = row.querySelector('td[contenteditable]');
-editableCell.addEventListener('input', saveTasksToGoogleSheet);
+editableCell.addEventListener('input', saveTasksToFirebase);
 editableCell.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     e.preventDefault();
@@ -694,7 +711,7 @@ clonedRow.addEventListener('animationend', () => {
   clonedRow.classList.remove('fade-in');
 });
 
-  saveTasksToGoogleSheet();
+  saveTasksToFirebase();
 }
 
 
@@ -728,7 +745,7 @@ clonedRow.addEventListener('animationend', () => {
 }
 
 
-   async function saveTasksToGoogleSheet() {
+async function saveTasksToFirebase() {
   const rows = document.querySelectorAll('#task-body tr');
   const tasks = Array.from(rows).map(row => ({
     Task: row.cells[0].innerText.trim(),
@@ -738,22 +755,24 @@ clonedRow.addEventListener('animationend', () => {
   }));
 
   try {
-    await fetch('https://script.google.com/macros/s/AKfycbykK3QZ8vXRgZrkKWTr6tEd82FQoHQikEFciSAVY8xXZCwZc412Qg1zaKypIT5i-PAQ/exec', {
-      method: 'POST',
-      body: JSON.stringify(tasks),
-      headers: { 'Content-Type': 'application/json' }
-    });
-    console.log('✅ Tasks saved to Google Sheet');
+    await set(ref(db, 'tasks'), tasks);
+    console.log('✅ Tasks saved to Firebase');
   } catch (err) {
-    console.error('❌ Error saving tasks:', err);
+    console.error('❌ Error saving tasks to Firebase:', err);
   }
 }
 
 
-async function loadTasksFromStorage() {
+
+async function loadTasksFromFirebase() {
   try {
-    const response = await fetch('https://script.google.com/macros/s/AKfycbykK3QZ8vXRgZrkKWTr6tEd82FQoHQikEFciSAVY8xXZCwZc412Qg1zaKypIT5i-PAQ/exec');
-    const tasks = await response.json();
+    const snapshot = await get(ref(db, 'tasks'));
+    if (!snapshot.exists()) {
+      console.log("No tasks found in Firebase");
+      return;
+    }
+
+    const tasks = snapshot.val();
     const tbody = document.getElementById('task-body');
     tbody.innerHTML = '';
 
@@ -771,7 +790,7 @@ async function loadTasksFromStorage() {
       selects[2].value = task.AssignedTo || 'Both';
 
       const editableCell = row.querySelector('td[contenteditable]');
-      editableCell.addEventListener('input', () => saveTasksToGoogleSheet());
+      editableCell.addEventListener('input', saveTasksToFirebase);
       editableCell.addEventListener('keydown', e => {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -780,7 +799,7 @@ async function loadTasksFromStorage() {
       });
 
       row.querySelectorAll('select').forEach(select => {
-        select.addEventListener('change', () => saveTasksToGoogleSheet());
+        select.addEventListener('change', saveTasksToFirebase);
       });
 
       tbody.appendChild(row);
@@ -788,9 +807,10 @@ async function loadTasksFromStorage() {
 
     applySelectStyles();
   } catch (err) {
-    console.error('❌ Failed to load tasks:', err);
+    console.error('❌ Failed to load tasks from Firebase:', err);
   }
 }
+
 
 
     // --------- SELECT STYLE UTILS ---------
@@ -955,7 +975,7 @@ async function loadTasksFromStorage() {
 
     // --------- INITIAL LOAD ---------
 window.addEventListener('DOMContentLoaded', () => {
-  loadTasksFromStorage();
+  loadTasksFromFirebase();
   loadGroceriesFromStorage();
   loadChoresFromStorage();
   loadMealProgressFromStorage();
