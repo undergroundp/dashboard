@@ -30,8 +30,12 @@
   };
 
   const app = initializeApp(firebaseConfig);
-  window.db = getDatabase(app);
+  window.db = getDatabase(app); // Make db available globally
+  window.ref = ref;
+  window.set = set;
+  window.get = get;
 </script>
+
 
 
   <style>
