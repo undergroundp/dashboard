@@ -869,7 +869,7 @@ function loadTasksFromFirebase() {
     async function saveGroceriesToFirebase() {
   const items = Array.from(document.querySelectorAll('#grocery-items label')).map(label => label.innerText.trim());
   try {
-    await set(ref(db, 'groceries'), items);
+    await window.db.ref('groceries').set(items);
     console.log('✅ Grocery list saved');
   } catch (err) {
     console.error('❌ Error saving groceries:', err);
@@ -879,7 +879,7 @@ function loadTasksFromFirebase() {
 
 async function loadGroceriesFromFirebase() {
   try {
-    const snapshot = await get(ref(db, 'groceries'));
+    const snapshot = await window.db.ref('groceries').once('value');
     if (!snapshot.exists()) return;
 
     const items = snapshot.val();
@@ -916,7 +916,7 @@ async function loadGroceriesFromFirebase() {
    async function saveChoresToFirebase() {
   const doneChores = Array.from(document.querySelectorAll('.chore-button.done')).map(btn => btn.innerText.trim());
   try {
-    await set(ref(db, 'chores'), doneChores);
+    await window.db.ref('chores').set(doneChores);
     console.log('✅ Chores saved');
   } catch (err) {
     console.error('❌ Error saving chores:', err);
@@ -925,7 +925,7 @@ async function loadGroceriesFromFirebase() {
 
    async function loadChoresFromFirebase() {
   try {
-    const snapshot = await get(ref(db, 'chores'));
+    const snapshot = await window.db.ref('chores').once('value');
     if (!snapshot.exists()) return;
 
     const doneChores = snapshot.val();
