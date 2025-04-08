@@ -19,15 +19,16 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
   import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyA_DCdUq9Nyi_n1dNHRanobGReveOqdS0g",
-    authDomain: "dashboard-sync-901fd.firebaseapp.com",
-    databaseURL: "https://dashboard-sync-901fd-default-rtdb.firebaseio.com",
-    projectId: "dashboard-sync-901fd",
-    storageBucket: "dashboard-sync-901fd.firebasestorage.app",
-    messagingSenderId: "901043569116",
-    appId: "1:901043569116:web:522c157f002d4bfc794f19"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyA_DCdUq9Nyi_n1dNHRanobGReveOqdS0g",
+  authDomain: "dashboard-sync-901fd.firebaseapp.com",
+  databaseURL: "https://dashboard-sync-901fd-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "dashboard-sync-901fd",
+  storageBucket: "dashboard-sync-901fd.firebasestorage.app",
+  messagingSenderId: "901043569116",
+  appId: "1:901043569116:web:522c157f002d4bfc794f19"
+};
+
 
   const app = initializeApp(firebaseConfig);
   window.db = getDatabase(app); // Make db available globally
