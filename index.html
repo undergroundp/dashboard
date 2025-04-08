@@ -946,7 +946,7 @@ function loadChoresFromFirebase() {
         row.innerHTML = `<td>${day}</td><td>${meal}</td><td><button onclick="changeMeal(this, '${day}')">Change Meal</button></td>`;
         tbody.appendChild(row);
       }
-      saveMealProgressToStorage();
+      saveMealProgressToFirebase();
     }
 
     function changeMeal(btn, day) {
@@ -955,18 +955,24 @@ function loadChoresFromFirebase() {
       let index = (currentMealIndices[day] + 1) % meals.length;
       currentMealIndices[day] = index;
       cell.innerText = meals[index];
-      saveMealProgressToStorage();
+      saveMealProgressToFirebase();
     }
 
-    function saveMealProgressToStorage() {
-      localStorage.setItem('mealProgressIndices', JSON.stringify(currentMealIndices));
-    }
+function saveMealProgressToFirebase() {
+  window.db.ref('meals').set(currentMealIndices)
+    .then(() => console.log('✅ Meals saved to Firebase'))
+    .catch(err => console.error('❌ Error saving meals:', err));
+}
 
-    function loadMealProgressFromStorage() {
-      const saved = localStorage.getItem('mealProgressIndices');
+
+function loadMealProgressFromFirebase() {
+  window.db.ref('meals').once('value')
+    .then(snapshot => {
+      const saved = snapshot.val();
       if (!saved) return;
-      const savedIndices = JSON.parse(saved);
-      Object.keys(savedIndices).forEach(day => currentMealIndices[day] = savedIndices[day]);
+
+      Object.keys(saved).forEach(day => currentMealIndices[day] = saved[day]);
+
       const tbody = document.getElementById('meal-plan-body');
       tbody.innerHTML = '';
       for (const [day, meals] of Object.entries(mealData)) {
@@ -976,7 +982,12 @@ function loadChoresFromFirebase() {
         row.innerHTML = `<td>${day}</td><td>${meal}</td><td><button onclick="changeMeal(this, '${day}')">Change Meal</button></td>`;
         tbody.appendChild(row);
       }
-    }
+    })
+    .catch(err => {
+      console.error('❌ Failed to load meals:', err);
+    });
+}
+
 
 
   async function listUpcomingEvents() {
@@ -1004,9 +1015,10 @@ function loadChoresFromFirebase() {
     // --------- INITIAL LOAD ---------
 window.addEventListener('DOMContentLoaded', () => {
   loadTasksFromFirebase();
-  loadMealProgressFromStorage();
   loadGroceriesFromFirebase();
 loadChoresFromFirebase();
+  loadMealProgressFromFirebase();
+
 
 
   // === FULLCALENDAR INIT ===
