@@ -78,6 +78,7 @@
       color: var(--text-dark);
     background-color: var(--bg-body);
   transition: background-color 0.4s, color 0.4s;
+      scroll-behavior: smooth;
 }
 
     body > .tabs + .tab-content {
@@ -439,6 +440,27 @@ button:active {
   background: var(--lavender);
   transform: scale(1.1);
 }
+
+    /* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--blush);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--lavender);
+  border-radius: 8px;
+  border: 2px solid var(--blush); /* for a "hollow" effect */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--rose);
+}
+
 
 
 
