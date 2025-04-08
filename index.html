@@ -935,24 +935,25 @@ function loadChoresFromFirebase() {
 
 
     // --------- MEAL PLAN FUNCTIONS ---------
-    function generateMealPlan() {
-      const tbody = document.getElementById('meal-plan-body');
-      tbody.innerHTML = '';
-      for (const [day, meals] of Object.entries(mealData)) {
-        let index = (currentMealIndices[day] + 1) % meals.length;
-        currentMealIndices[day] = index;
-        const meal = meals[index];
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${day}</td><td>${meal}</td><td><button onclick="changeMeal(this, '${day}')">Change Meal</button></td>`;
-        tbody.appendChild(row);
-      }
-      saveMealProgressToFirebase();
-    }
+function generateMealPlan() {
+  const tbody = document.getElementById('meal-plan-body');
+  tbody.innerHTML = '';
+  for (const [day, meals] of Object.entries(mealData)) {
+    let index = ((currentMealIndices[day] ?? -1) + 1) % meals.length;
+    currentMealIndices[day] = index;
+    const meal = meals[index];
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${day}</td><td>${meal}</td><td><button onclick="changeMeal(this, '${day}')">Change Meal</button></td>`;
+    tbody.appendChild(row);
+  }
+  saveMealProgressToFirebase();
+}
+
 
     function changeMeal(btn, day) {
       const cell = btn.parentElement.previousElementSibling;
       const meals = mealData[day];
-      let index = (currentMealIndices[day] + 1) % meals.length;
+let index = ((currentMealIndices[day] ?? -1) + 1) % meals.length;
       currentMealIndices[day] = index;
       cell.innerText = meals[index];
       saveMealProgressToFirebase();
