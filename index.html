@@ -440,13 +440,6 @@ button:active {
   transform: scale(1.1);
 }
 
-    #calendar {
-  min-height: 1000px; /* or whatever space you want */
-}
-
-#fullcalendar {
-  height: 100%; /* let FullCalendar expand fully */
-}
 
 
   </style>
@@ -1058,7 +1051,7 @@ loadChoresFromFirebase();
     window.myDashboardCalendar = new FullCalendar.Calendar(calendarEl, {
   initialView: 'dayGridMonth',
 firstDay: 1,
-  height: '1000',
+  height: 'auto',
   headerToolbar: {
   start: 'prev,next today',
   center: 'title',
