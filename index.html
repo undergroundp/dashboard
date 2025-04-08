@@ -912,21 +912,6 @@ async function loadGroceriesFromFirebase() {
       saveChoresToFirebase();
     }
 
-    function saveChoresToStorage() {
-      const doneChores = Array.from(document.querySelectorAll('.chore-button.done')).map(btn => btn.innerText.trim());
-      localStorage.setItem('doneChores', JSON.stringify(doneChores));
-    }
-
-    function loadChoresFromStorage() {
-      const saved = localStorage.getItem('doneChores');
-      if (!saved) return;
-      const doneChores = JSON.parse(saved);
-      document.querySelectorAll('.chore-button').forEach(btn => {
-        if (doneChores.includes(btn.innerText.trim())) {
-          btn.classList.add('done');
-        }
-      });
-    }
 
    async function saveChoresToFirebase() {
   const doneChores = Array.from(document.querySelectorAll('.chore-button.done')).map(btn => btn.innerText.trim());
@@ -1026,8 +1011,6 @@ async function loadGroceriesFromFirebase() {
     // --------- INITIAL LOAD ---------
 window.addEventListener('DOMContentLoaded', () => {
   loadTasksFromFirebase();
-  loadGroceriesFromStorage();
-  loadChoresFromStorage();
   loadMealProgressFromStorage();
   loadGroceriesFromFirebase();
 loadChoresFromFirebase();
