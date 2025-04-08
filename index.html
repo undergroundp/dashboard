@@ -717,8 +717,8 @@ editableCell.addEventListener('keydown', (e) => {
   document.getElementById('task-body').appendChild(row);
 
 // 🧼 Remove fade-in class after animation ends
-clonedRow.addEventListener('animationend', () => {
-  clonedRow.classList.remove('fade-in');
+Row.addEventListener('animationend', () => {
+  Row.classList.remove('fade-in');
 });
 
   saveTasksToFirebase();
@@ -850,13 +850,13 @@ function loadTasksFromFirebase() {
         div.classList.add('removing');
         setTimeout(() => {
           div.remove();
-          saveGroceriesToStorage();
+          saveGroceriesToFirebase();
         }, 300);
       });
 
       document.getElementById('grocery-items').appendChild(div);
       input.value = '';
-      saveGroceriesToStorage();
+      saveGroceriesToFirebase();
     }
 
     function handleGroceryKey(e) {
@@ -866,34 +866,50 @@ function loadTasksFromFirebase() {
       }
     }
 
-    function saveGroceriesToStorage() {
-      const items = Array.from(document.querySelectorAll('#grocery-items label')).map(label => label.innerText.trim());
-      localStorage.setItem('groceryItems', JSON.stringify(items));
-    }
+    async function saveGroceriesToFirebase() {
+  const items = Array.from(document.querySelectorAll('#grocery-items label')).map(label => label.innerText.trim());
+  try {
+    await set(ref(db, 'groceries'), items);
+    console.log('✅ Grocery list saved');
+  } catch (err) {
+    console.error('❌ Error saving groceries:', err);
+  }
+}
 
-    function loadGroceriesFromStorage() {
-      const saved = localStorage.getItem('groceryItems');
-      if (!saved) return;
-      const items = JSON.parse(saved);
-      items.forEach(value => {
-        const div = document.createElement('div');
-        div.className = 'grocery-item';
-        div.innerHTML = `<input type="checkbox"> <label>${value}</label>`;
-        div.querySelector('input').addEventListener('change', () => {
-          div.classList.add('removing');
-          setTimeout(() => {
-            div.remove();
-            saveGroceriesToStorage();
-          }, 300);
-        });
-        document.getElementById('grocery-items').appendChild(div);
+
+async function loadGroceriesFromFirebase() {
+  try {
+    const snapshot = await get(ref(db, 'groceries'));
+    if (!snapshot.exists()) return;
+
+    const items = snapshot.val();
+    const container = document.getElementById('grocery-items');
+    container.innerHTML = '';
+
+    items.forEach(value => {
+      const div = document.createElement('div');
+      div.className = 'grocery-item';
+      div.innerHTML = `<input type="checkbox"> <label>${value}</label>`;
+      div.querySelector('input').addEventListener('change', () => {
+        div.classList.add('removing');
+        setTimeout(() => {
+          div.remove();
+          saveGroceriesToFirebase();
+        }, 300);
       });
-    }
+      container.appendChild(div);
+    });
+
+  } catch (err) {
+    console.error('❌ Failed to load groceries:', err);
+  }
+}
+
 
     // --------- CHORE FUNCTIONS ---------
     function toggleChore(btn) {
       btn.classList.toggle('done');
-      saveChoresToStorage();
+      saveChoresToFirebase();
     }
 
     function saveChoresToStorage() {
@@ -911,6 +927,34 @@ function loadTasksFromFirebase() {
         }
       });
     }
+
+   async function saveChoresToFirebase() {
+  const doneChores = Array.from(document.querySelectorAll('.chore-button.done')).map(btn => btn.innerText.trim());
+  try {
+    await set(ref(db, 'chores'), doneChores);
+    console.log('✅ Chores saved');
+  } catch (err) {
+    console.error('❌ Error saving chores:', err);
+  }
+}
+
+   async function loadChoresFromFirebase() {
+  try {
+    const snapshot = await get(ref(db, 'chores'));
+    if (!snapshot.exists()) return;
+
+    const doneChores = snapshot.val();
+    document.querySelectorAll('.chore-button').forEach(btn => {
+      if (doneChores.includes(btn.innerText.trim())) {
+        btn.classList.add('done');
+      }
+    });
+  } catch (err) {
+    console.error('❌ Failed to load chores:', err);
+  }
+}
+
+
 
     // --------- MEAL PLAN FUNCTIONS ---------
     function generateMealPlan() {
@@ -985,6 +1029,9 @@ window.addEventListener('DOMContentLoaded', () => {
   loadGroceriesFromStorage();
   loadChoresFromStorage();
   loadMealProgressFromStorage();
+  loadGroceriesFromFirebase();
+loadChoresFromFirebase();
+
 
   // === FULLCALENDAR INIT ===
   const calendarEl = document.getElementById('fullcalendar');
