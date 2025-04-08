@@ -866,44 +866,40 @@ function loadTasksFromFirebase() {
       }
     }
 
-    async function saveGroceriesToFirebase() {
+function saveGroceriesToFirebase() {
   const items = Array.from(document.querySelectorAll('#grocery-items label')).map(label => label.innerText.trim());
-  try {
-    await window.db.ref('groceries').set(items);
-    console.log('✅ Grocery list saved');
-  } catch (err) {
-    console.error('❌ Error saving groceries:', err);
-  }
+  window.db.ref('groceries').set(items)
+    .then(() => console.log('✅ Grocery list saved'))
+    .catch(err => console.error('❌ Error saving groceries:', err));
 }
 
 
-async function loadGroceriesFromFirebase() {
-  try {
-    const snapshot = await window.db.ref('groceries').once('value');
-    if (!snapshot.exists()) return;
 
-    const items = snapshot.val();
-    const container = document.getElementById('grocery-items');
-    container.innerHTML = '';
+function loadGroceriesFromFirebase() {
+  window.db.ref('groceries').once('value')
+    .then(snapshot => {
+      if (!snapshot.exists()) return;
+      const items = snapshot.val();
+      const container = document.getElementById('grocery-items');
+      container.innerHTML = '';
 
-    items.forEach(value => {
-      const div = document.createElement('div');
-      div.className = 'grocery-item';
-      div.innerHTML = `<input type="checkbox"> <label>${value}</label>`;
-      div.querySelector('input').addEventListener('change', () => {
-        div.classList.add('removing');
-        setTimeout(() => {
-          div.remove();
-          saveGroceriesToFirebase();
-        }, 300);
+      items.forEach(value => {
+        const div = document.createElement('div');
+        div.className = 'grocery-item';
+        div.innerHTML = `<input type="checkbox"> <label>${value}</label>`;
+        div.querySelector('input').addEventListener('change', () => {
+          div.classList.add('removing');
+          setTimeout(() => {
+            div.remove();
+            saveGroceriesToFirebase();
+          }, 300);
+        });
+        container.appendChild(div);
       });
-      container.appendChild(div);
-    });
-
-  } catch (err) {
-    console.error('❌ Failed to load groceries:', err);
-  }
+    })
+    .catch(err => console.error('❌ Failed to load groceries:', err));
 }
+
 
 
     // --------- CHORE FUNCTIONS ---------
@@ -913,31 +909,28 @@ async function loadGroceriesFromFirebase() {
     }
 
 
-   async function saveChoresToFirebase() {
+function saveChoresToFirebase() {
   const doneChores = Array.from(document.querySelectorAll('.chore-button.done')).map(btn => btn.innerText.trim());
-  try {
-    await window.db.ref('chores').set(doneChores);
-    console.log('✅ Chores saved');
-  } catch (err) {
-    console.error('❌ Error saving chores:', err);
-  }
+  window.db.ref('chores').set(doneChores)
+    .then(() => console.log('✅ Chores saved'))
+    .catch(err => console.error('❌ Error saving chores:', err));
 }
 
-   async function loadChoresFromFirebase() {
-  try {
-    const snapshot = await window.db.ref('chores').once('value');
-    if (!snapshot.exists()) return;
 
-    const doneChores = snapshot.val();
-    document.querySelectorAll('.chore-button').forEach(btn => {
-      if (doneChores.includes(btn.innerText.trim())) {
-        btn.classList.add('done');
-      }
-    });
-  } catch (err) {
-    console.error('❌ Failed to load chores:', err);
-  }
+function loadChoresFromFirebase() {
+  window.db.ref('chores').once('value')
+    .then(snapshot => {
+      if (!snapshot.exists()) return;
+      const doneChores = snapshot.val();
+      document.querySelectorAll('.chore-button').forEach(btn => {
+        if (doneChores.includes(btn.innerText.trim())) {
+          btn.classList.add('done');
+        }
+      });
+    })
+    .catch(err => console.error('❌ Failed to load chores:', err));
 }
+
 
 
 
