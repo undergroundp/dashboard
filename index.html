@@ -15,29 +15,6 @@
 <script src="https://apis.google.com/js/api.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyA_DCdUq9Nyi_n1dNHRanobGReveOqdS0g",
-  authDomain: "dashboard-sync-901fd.firebaseapp.com",
-  databaseURL: "https://dashboard-sync-901fd-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "dashboard-sync-901fd",
-  storageBucket: "dashboard-sync-901fd.firebasestorage.app",
-  messagingSenderId: "901043569116",
-  appId: "1:901043569116:web:522c157f002d4bfc794f19"
-};
-
-
-  const app = initializeApp(firebaseConfig);
-  window.db = getDatabase(app); // Make db available globally
-  window.ref = ref;
-  window.set = set;
-  window.get = get;
-</script>
-
-
 
   <style>
    :root {
@@ -515,7 +492,24 @@ button:active {
     <div id="fullcalendar"></div>
   </div>
 
-  <script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA_DCdUq9Nyi_n1dNHRanobGReveOqdS0g",
+    authDomain: "dashboard-sync-901fd.firebaseapp.com",
+    databaseURL: "https://dashboard-sync-901fd-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "dashboard-sync-901fd",
+    storageBucket: "dashboard-sync-901fd.firebasestorage.app",
+    messagingSenderId: "901043569116",
+    appId: "1:901043569116:web:522c157f002d4bfc794f19"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+    
     // --------- STATE SETUP ---------
     const sortDirections = [true, true, 0, 0];
     const priorityOrder = { High: 1, Medium: 2, Low: 3 };
