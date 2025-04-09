@@ -190,7 +190,13 @@
 }
 
 /* Tab buttons stay pastel flat */
-.tab-button[onclick="showTab('tasks')"] { background: var(--lavender); }
+.tab-button[onclick="showTab('tasks')"] {
+  background-image: url('/dashboard/images/tasksbuttonback.jpg');
+  background-size: cover;
+  background-position: center;
+  color: white; /* make text visible */
+}
+  
 .tab-button[onclick="showTab('chores')"] { background: var(--blush); }
 .tab-button[onclick="showTab('meal')"] { background: var(--rose); }
 .tab-button[onclick="showTab('calendar')"] { background: var(--blue); }
